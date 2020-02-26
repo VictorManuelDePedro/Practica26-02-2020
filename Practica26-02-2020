@@ -1,0 +1,28 @@
+#<<<<<<<<<<< Ver Logs del sistema >>>>>>>>>>>#
+
+Get-EventLog -LogName System |
+  ForEach-Object {
+      [PSCustomObject]@{
+          Time = $_.TimeGenerated
+          LogonType = $_.ReplacementStrings[8]
+          Process = $_.ReplacementStrings[9]
+          Domain = $_.ReplacementStrings[5]
+          User = $_.ReplacementStrings[6]
+          Method = $_.ReplacementStrings[10]
+          Source = $_.Source
+
+      }
+  } | Out-GridView
+
+#<<<<<<<<<<< Cifrar y mandar a Linux >>>>>>>>>>>>#
+
+$TxT = "C:\Users\Night"
+$Cifrar = gc $fichero
+$Text = "Hola"
+$textcifrar = (0..($Cifrar.Length-1) | % {[char]::ConvertFromUtf32([char]::ConvertToUtf32($Cifrar[$_].ToString(),0)+$Text)}) -join ""
+
+$TxTin = $TxT.Replace(".","")
+$TxTcifrar=(0..($TxTin.Length-1) | % {[char]::ConvertFromUtf32([char]::ConvertToUtf32($TxTin[$_].ToString(),0)+$Text)}) -join ""
+$textcifrar | Out-File $TxTcifrar
+
+Set-SCPFile -LocalFile $TxTcifrar -ComputerName 127.0.0.148 -RemotePath . -Credential (Get-Credential)
